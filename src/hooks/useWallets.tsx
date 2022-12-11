@@ -2,6 +2,7 @@ import { useMetaMask } from "metamask-react";
 import { Wallet } from "../models/Wallet";
 import { Chain, KeplrChain } from "../models/Chain";
 import Web3 from "web3";
+import { Connection, PublicKey } from "@solana/web3.js";
 
 const useWallets = () => {
   const metamask = useMetaMask();
@@ -73,7 +74,27 @@ const useWallets = () => {
     }
   };
 
-  const getBalance = () => {};
+  const getBalance = async (
+    wallet: Wallet,
+    // chain: Chain,
+    address: string
+  ): Promise<string> => {
+    let balance = "";
+    switch (wallet.id) {
+      case "metamask":
+        const web3 = new Web3(_window.ethereum);
+        balance = await web3.eth.getBalance(address); // 잔고조회
+        balance = web3.utils.fromWei(balance, "ether"); // wei 단위 바꾸기
+        return balance;
+      case "phantom":
+        const connection = new Connection("https://api.devnet.solana.com");
+        const publicKey = new PublicKey(address);
+        let sol_balance = await connection.getBalance(publicKey);
+        return sol_balance.toString();
+      default:
+        throw Error(`Unknown wallet with id '${wallet.id}'`);
+    }
+  };
 
   return {
     isInstalled,
