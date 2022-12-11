@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { MetaMaskProvider } from "metamask-react";
+import { SnackbarProvider } from "notistack";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -11,9 +12,14 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <MetaMaskProvider>
-      <App />
-    </MetaMaskProvider>
+    <SnackbarProvider
+      autoHideDuration={2000}
+      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+    >
+      <MetaMaskProvider>
+        <App />
+      </MetaMaskProvider>
+    </SnackbarProvider>
   </React.StrictMode>
 );
 

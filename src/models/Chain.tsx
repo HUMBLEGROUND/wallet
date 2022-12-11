@@ -7,6 +7,6 @@ export type Chain = {
   icon: string;
 };
 
-export interface KeplrChain {
+export interface KeplrChain extends Chain {
   keplrChainId: keplrChainId;
 }
