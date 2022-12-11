@@ -6,6 +6,7 @@ import {
   Select,
   MenuItem,
   Button,
+  Alert,
 } from "@mui/material";
 import "./ConnectWallet.css";
 import { Wallet } from "../models/Wallet";
@@ -30,6 +31,7 @@ export const ConnectWallet = (props: ConnectWalletType) => {
   const [balance, setBalance] = useState("");
   const [installed, SetInstalled] = useState<Boolean>(); // 지갑설치여부
 
+  const { enqueueSnackbar } = useSnackbar();
   const { isInstalled, isConnected, connected, getAddress, getBalance } =
     useWallets();
 
@@ -87,13 +89,27 @@ export const ConnectWallet = (props: ConnectWalletType) => {
       if (wallet && chain) {
         // 지갑과 체인이 연결되어있다면
         await connected(wallet, chain);
+        enqueueSnackbar("Operation success", { variant: "success" });
         const _address = await getAddress(wallet, chain);
         setAddress(_address);
       }
     } catch (e) {
       console.log(e);
+      enqueueSnackbar("Operation cancelled", { variant: "error" });
     }
   };
+
+  const handleCleanSelections = () => {
+    setWallet(null);
+    setWalletId("");
+    setChain(null);
+    setChainId("");
+    setChainArr([]);
+    setAddress("");
+    setBalance("");
+    SetInstalled(false);
+  };
+
   return (
     <div className="ConnectWallet">
       <h4> Wallet Connector </h4>
@@ -116,23 +132,30 @@ export const ConnectWallet = (props: ConnectWalletType) => {
         </Select>
       </FormControl>
 
-      <FormControl className="FormControl" fullWidth>
-        <InputLabel>Origin Chain</InputLabel>
-        <Select
-          id="OriginChainDropdown"
-          labelId="OriginChainDropdown"
-          value={chainId}
-          label="Origin Chain"
-          onChange={handleSelectChain}
-        >
-          {chainArr.map((chain, index) => (
-            <MenuItem className="DropdownItem" key={index} value={chain.id}>
-              <div className={"icon " + chain.icon} />
-              <span>{chain.name}</span>
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      {wallet && installed && (
+        <FormControl className="FormControl" fullWidth>
+          <InputLabel>Origin Chain</InputLabel>
+          <Select
+            id="OriginChainDropdown"
+            labelId="OriginChainDropdown"
+            value={chainId}
+            label="Origin Chain"
+            onChange={handleSelectChain}
+          >
+            {chainArr.map((chain, index) => (
+              <MenuItem className="DropdownItem" key={index} value={chain.id}>
+                <div className={"icon " + chain.icon} />
+                <span>{chain.name}</span>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
+      {wallet && !installed && (
+        <Alert severity="info" onClose={() => handleCleanSelections()}>
+          Install {wallet.name} to connect to select a chain
+        </Alert>
+      )}
       {wallet && chain && isInstalled(wallet) && (
         <div>
           <Button
